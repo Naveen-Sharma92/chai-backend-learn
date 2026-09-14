@@ -1,8 +1,8 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import {ApiError} from "../utils/ApiError.js"
-import {User} from "../models/user.model.js"
-import {uploadOnCloudinary} from "../utils/cloudinery.js"
-import {ApiResponse} from "../utils/ApiResponse.js"
+import { ApiError } from "../utils/ApiError.js"
+import { User } from "../models/user.model.js"
+import { uploadOnCloudinary } from "../utils/cloudinery.js"
+import { ApiResponse } from "../utils/ApiResponse.js"
 const registerUser = asyncHandler(async (req, res) => {
     //steps
     //get user details from frontend
@@ -17,8 +17,8 @@ const registerUser = asyncHandler(async (req, res) => {
     // return response
 
     //get user details from frontend
-    const {fullname, email,username, password}=req.body;
-    console.log("email: ",email);
+    const { fullName, email, username, password } = req.body;
+    console.log("email: ", email);
     //validation
     /*
     if(fullname==""){
@@ -30,38 +30,38 @@ const registerUser = asyncHandler(async (req, res) => {
     ) {
         throw new ApiError(400, "All fields are required")
     }
-     //check if user already exists:using username and email
-     const existeduser = User.findOne({
-        $or: [{email},{username}]
+    //check if user already exists:using username and email
+    const existeduser = await User.findOne({
+        $or: [{ email }, { username }]
     })
-    if(existeduser){
-        throw new ApiError(409,"user already existed")
+    if (existeduser) {
+        throw new ApiError(409, "user already existed")
     }
 
     //check for images check for avatars
-    const avatarLocalPath =req.files?.avatar[0]?.path; //multer .files is used to get file location of local store avatar
+    const avatarLocalPath = req.files?.avatar[0]?.path; //multer .files is used to get file location of local store avatar
     const coverImageLocalPath = req.files?.coverImage[0]?.path;//multer .files is used to get file location of local store coverImage
 
-    if(!avatarLocalPath){
-        throw new ApiError(400,"NO Avatar is missing fill it");
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "NO Avatar is missing fill it");
     }
-    if(!coverImageLocalPathLocalPath){
-        throw new ApiError(400,"NO CoverImage is missing fill it");
+    if (!coverImageLocalPath) {
+        throw new ApiError(400, "NO CoverImage is missing fill it");
     }
     //now upload on cloudnerry 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
     //check if upload or not
-    if(!avatar){
-        throw new ApiError(400,"avatar not found on cloudnerry")
+    if (!avatar) {
+        throw new ApiError(400, "avatar not found on cloudnerry")
     }
 
     //create user object and create db entery
     const user = await User.create({
-        fullname,
+        fullName,
         avatar: avatar.url,
-        coverImage: coverImage?.url ||"", //means if no url of coverImage just empty
-        email, 
+        coverImage: coverImage?.url || "", //means if no url of coverImage just empty
+        email,
         password,
         username: username.toLowerCase()
     })
@@ -70,12 +70,12 @@ const registerUser = asyncHandler(async (req, res) => {
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"  // in select -password means select everything but not password and refreshTOken 
     )
-    if(!createdUser){
-        throw new ApiError(500,"Data entry not created in db")
+    if (!createdUser) {
+        throw new ApiError(500, "Data entry not created in db")
     }
-     // return response
+    // return response
     res.status(201).json(
-        new ApiResponse(200,createdUser,"User created successfully")
+        new ApiResponse(200, createdUser, "User created successfully")
     )
 
 })

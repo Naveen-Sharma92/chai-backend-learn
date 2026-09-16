@@ -2,7 +2,7 @@
 const asyncHandler = (requestHandler) => {
     return (req, res, next) => {
         Promise.resolve(requestHandler(req, res, next))
-            .catch((err) => next(err));
+            .catch((err) => next(err)); //forwarding errors to Express with next(err)
     };
 };
 export {asyncHandler} //Make asyncHandler available to other JavaScript files that is the work of export
